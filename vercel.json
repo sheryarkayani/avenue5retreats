@@ -3,7 +3,7 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/node",
+      "use": "@vercel/node@18",
       "config": {
         "buildCommand": "npm ci && npm run build",
         "outputDirectory": "dist"
@@ -11,6 +11,9 @@
     }
   ],
   "routes": [
+    {
+      "handle": "filesystem"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
