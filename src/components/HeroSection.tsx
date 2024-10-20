@@ -1,87 +1,207 @@
-import { Button } from "../components/ui/button";
+"use client"
 
-// Extract HeroSection component
-function HeroSection() {
+import { useRef, useState, useEffect } from 'react'
+import { Button } from '../components/ui/button'
+import { motion, useScroll, useTransform, useMotionValue, useSpring, useAnimation } from 'framer-motion'
+import { Parallax } from 'react-parallax'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Sphere, MeshDistortMaterial } from '@react-three/drei'
+
+const FloatingSphere = () => {
+  const meshRef = useRef()
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime()
+    meshRef.current.position.y = Math.sin(t) * 0.1
+  })
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        className="absolute z-0 w-full h-full object-cover"
-      >
-        <source
-          src="https://images.graana.com/video/upload/agency21/2_1/1655993188.mp4"
-          type="video/mp4"
-        />
-        Your browser does not support the video tag.
-      </video>
-
-      {/* Dark Overlay */}
-      <div className="absolute z-5 w-full h-full bg-black bg-opacity-40"></div>
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen text-white">
-        <main className="flex-grow flex items-center justify-center px-4 md:px-12">
-          <div className="container mx-auto flex flex-col items-center justify-center text-center space-y-8 animate-fadeIn">
-            {/* Title with Fade-in Animation */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-slideUp pt-16">
-              Bahria Town's Leading<br />Highrise Developer
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-xl md:text-3xl mb-8 animate-slideUp delay-150">
-              <span className="text-yellow-300">Find your new home</span>
-              <br />
-              Search properties for sale and rent in Bahria Town
-            </p>
-
-          {/* Buttons Section */}
-      <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 mb-12">
-        <Button
-          variant="outline"
-          className="bg-black text-white border border-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 animate-fadeIn delay-200 py-4 px-8 rounded-lg w-72 text-center flex flex-col items-center justify-center h-24"
-        >
-          <span className="block text-base font-normal mb-1">Selling or Renting out?</span>
-          <span className="block font-bold text-2xl">Free Valuation</span>
-        </Button>
-        <Button
-          className="bg-[#2e8b57] hover:bg-[#236e44] text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 animate-fadeIn delay-300 py-4 px-8 rounded-lg w-72 text-center flex flex-col items-center justify-center h-24"
-        >
-          <span className="block text-base font-normal mb-1">Buying, Renting or Invest?</span>
-          <span className="block font-bold text-2xl">Hot Deals</span>
-        </Button>
-            </div>
-
-            {/* Secondary Button */}
-            <Button className="bg-yellow-400 text-black hover:bg-yellow-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 animate-slideUp delay-400 py-6 px-16 text-lg rounded-lg">
-              Looking for Highrise Investment
-            </Button>
-
-            {/* Form Section */}
-            <div className="mt-16 bg-white bg-opacity-20 p-6 rounded-lg flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 max-w-5xl w-full animate-fadeIn delay-500">
-              <select className="bg-white text-black rounded px-4 py-3 flex-grow focus:ring-2 focus:ring-yellow-400 transition-all duration-300 shadow-md">
-                <option>City</option>
-              </select>
-              <select className="bg-white text-black rounded px-4 py-3 flex-grow focus:ring-2 focus:ring-yellow-400 transition-all duration-300 shadow-md">
-                <option>Area</option>
-              </select>
-              <select className="bg-white text-black rounded px-4 py-3 flex-grow focus:ring-2 focus:ring-yellow-400 transition-all duration-300 shadow-md">
-                <option>All Types</option>
-              </select>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500 px-12 py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 rounded-lg">
-                BUY
-              </Button>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500 px-12 py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 rounded-lg">
-                RENT
-              </Button>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+    <Sphere ref={meshRef} args={[1, 64, 64]}>
+      <MeshDistortMaterial color="#D4AF37" attach="material" distort={0.3} speed={1.5} />
+    </Sphere>
+  )
 }
 
-export default HeroSection;
+const HeroSection = () => {
+  const ref = useRef(null)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"]
+  })
+
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
+
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  const springConfig = { damping: 25, stiffness: 700 }
+  const mouseXSpring = useSpring(mouseX, springConfig)
+  const mouseYSpring = useSpring(mouseY, springConfig)
+
+  const titleControls = useAnimation()
+  const contentControls = useAnimation()
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      const { clientX, clientY } = event
+      const { innerWidth, innerHeight } = window
+      const x = clientX / innerWidth
+      const y = clientY / innerHeight
+      setMousePosition({ x, y })
+      mouseX.set(x)
+      mouseY.set(y)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [mouseX, mouseY])
+
+  useEffect(() => {
+    const sequence = async () => {
+      await titleControls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } })
+      await contentControls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } })
+    }
+    sequence()
+  }, [titleControls, contentControls])
+
+  return (
+    <Parallax bgImage="/hero-bg.jpg" strength={500}>
+      <motion.section 
+        ref={ref}
+        style={{ opacity, scale }}
+        className="w-full min-h-screen py-12 md:py-24 lg:py-32 xl:py-48 bg-[#001F3F] relative overflow-hidden flex items-center justify-center"
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{
+            backgroundPositionX: useTransform(mouseXSpring, [0, 1], ['45%', '55%']),
+            backgroundPositionY: useTransform(mouseYSpring, [0, 1], ['45%', '55%']),
+          }}
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="absolute inset-0 bg-[url('/luxury-pattern.svg')] bg-repeat opacity-5"
+          style={{
+            x: useTransform(mouseXSpring, [0, 1], ['-2%', '2%']),
+            y: useTransform(mouseYSpring, [0, 1], ['-2%', '2%']),
+          }}
+        />
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="flex flex-col items-center space-y-8 text-center">
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={titleControls}
+              className="space-y-4"
+            >
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
+                <motion.span 
+                  className="bg-clip-text text-transparent bg-gradient-to-r from-[#D4AF37] to-[#FFF700] inline-block"
+                  animate={{ 
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                  }}
+                  transition={{ 
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: 'linear'
+                  }}
+                >
+                  Experience Luxury Living
+                </motion.span>
+                <br />
+                with Avenue5 Hospitality
+              </h1>
+              <p className="mx-auto max-w-[700px] text-gray-300 text-sm md:text-base lg:text-xl">
+                Discover premium residential experiences in our high-rise apartments and hotel suites.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={contentControls}
+              className="space-y-4 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row items-center"
+            >
+              <Button 
+                className="w-full sm:w-auto bg-[#D4AF37] text-[#001F3F] hover:bg-[#C4A137] transition-all duration-300 transform hover:scale-105 text-base md:text-lg px-6 py-2 md:px-8 md:py-3 relative overflow-hidden group"
+              >
+                <span className="relative z-10">Explore Properties</span>
+                <motion.span 
+                  className="absolute inset-0 bg-white"
+                  initial={{ scale: 0, opacity: 0 }}
+                  whileHover={{ scale: 1, opacity: 0.2 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full sm:w-auto text-white border-white hover:bg-white hover:text-[#001F3F] transition-all duration-300 transform hover:scale-105 text-base md:text-lg px-6 py-2 md:px-8 md:py-3 relative overflow-hidden group"
+              >
+                <span className="relative z-10">Book Now</span>
+                <motion.span 
+                  className="absolute inset-0 bg-[#D4AF37]"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+        <motion.div
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#002F5F] to-transparent"
+        />
+        <motion.div
+          animate={{ 
+            y: [0, -10, 0],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ 
+            duration: 5, 
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+            <path d="M12 5v14M19 12l-7 7-7-7"/>
+          </svg>
+        </motion.div>
+        <motion.div
+          className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#001F3F] to-transparent"
+          initial={{ y: -100 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        />
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(212, 175, 55, 0.1) 0%, rgba(0, 31, 63, 0) 50%)`,
+          }}
+        />
+        <div className="absolute top-1/2 right-10 transform -translate-y-1/2 w-32 h-32 hidden lg:block">
+          <Canvas>
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} />
+            <FloatingSphere />
+          </Canvas>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1 }}
+          className="absolute bottom-4 left-4 text-white text-xs md:text-sm"
+        >
+      
+        </motion.div>
+      </motion.section>
+    </Parallax>
+  )
+}
+
+export default HeroSection
