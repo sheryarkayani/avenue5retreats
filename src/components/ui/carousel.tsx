@@ -1,26 +1,35 @@
-import React from 'react'
+// src/components/ui/carousel.tsx
+import React from 'react';
+import { CarouselProps, CarouselItemProps } from '../../types/carousel';
 
-export function Carousel({ className, children }: React.HTMLAttributes<HTMLDivElement>) {
+export const Carousel: React.FC<CarouselProps> = ({ className, children, ...props }) => {
   return (
-    <div className={`relative ${className}`}>
+    <div className={`carousel ${className}`} {...props}>
       {children}
     </div>
-  )
-}
+  );
+};
 
-export function CarouselContent({ children }: { children: React.ReactNode }) {
-  return <div className="flex">{children}</div>
-}
+export const CarouselContent: React.FC<CarouselProps> = ({ className, children, ...props }) => {
+  return (
+    <div className={`carousel-content ${className}`} {...props}>
+      {children}
+    </div>
+  );
+};
 
-export function CarouselItem({ children }: { children: React.ReactNode }) {
-  return <div className="flex-shrink-0 w-full">{children}</div>
-}
+export const CarouselItem: React.FC<CarouselItemProps> = ({ className, children, ...props }) => {
+  return (
+    <div className={`carousel-item ${className}`} {...props}>
+      {children}
+    </div>
+  );
+};
 
-export function CarouselPrevious() {
-  return <button className="absolute left-0 top-1/2 transform -translate-y-1/2">Previous</button>
-}
+export const CarouselPrevious: React.FC<React.HTMLAttributes<HTMLButtonElement>> = (props) => {
+  return <button {...props} className={`carousel-prev ${props.className}`} />;
+};
 
-export function CarouselNext() {
-  return <button className="absolute right-0 top-1/2 transform -translate-y-1/2">Next</button>
-}
-
+export const CarouselNext: React.FC<React.HTMLAttributes<HTMLButtonElement>> = (props) => {
+  return <button {...props} className={`carousel-next ${props.className}`} />;
+};

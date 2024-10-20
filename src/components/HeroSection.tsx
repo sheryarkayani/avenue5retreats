@@ -1,5 +1,6 @@
 "use client"
 
+import * as THREE from 'three';
 import { useRef, useState, useEffect } from 'react'
 import { Button } from '../components/ui/button'
 import { motion, useScroll, useTransform, useMotionValue, useSpring, useAnimation } from 'framer-motion'
@@ -8,61 +9,63 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { Sphere, MeshDistortMaterial } from '@react-three/drei'
 
 const FloatingSphere = () => {
-  const meshRef = useRef()
+  const meshRef = useRef<THREE.Mesh>(null);
   useFrame((state) => {
-    const t = state.clock.getElapsedTime()
-    meshRef.current.position.y = Math.sin(t) * 0.1
-  })
+    const t = state.clock.getElapsedTime();
+    if (meshRef.current) {
+      meshRef.current.position.y = Math.sin(t) * 0.1;
+    }
+  });
   return (
     <Sphere ref={meshRef} args={[1, 64, 64]}>
       <MeshDistortMaterial color="#D4AF37" attach="material" distort={0.3} speed={1.5} />
     </Sphere>
-  )
+  );
 }
 
 const HeroSection = () => {
-  const ref = useRef(null)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const ref = useRef(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"]
-  })
+  });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
 
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  const springConfig = { damping: 25, stiffness: 700 }
-  const mouseXSpring = useSpring(mouseX, springConfig)
-  const mouseYSpring = useSpring(mouseY, springConfig)
+  const springConfig = { damping: 25, stiffness: 700 };
+  const mouseXSpring = useSpring(mouseX, springConfig);
+  const mouseYSpring = useSpring(mouseY, springConfig);
 
-  const titleControls = useAnimation()
-  const contentControls = useAnimation()
+  const titleControls = useAnimation();
+  const contentControls = useAnimation();
+
+  const handleMouseMove = (event: MouseEvent) => {
+    const { clientX, clientY } = event;
+    const { innerWidth, innerHeight } = window;
+    const x = clientX / innerWidth;
+    const y = clientY / innerHeight;
+    setMousePosition({ x, y });
+    mouseX.set(x);
+    mouseY.set(y);
+  };
 
   useEffect(() => {
-    const handleMouseMove = (event) => {
-      const { clientX, clientY } = event
-      const { innerWidth, innerHeight } = window
-      const x = clientX / innerWidth
-      const y = clientY / innerHeight
-      setMousePosition({ x, y })
-      mouseX.set(x)
-      mouseY.set(y)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [mouseX, mouseY])
+    window.addEventListener('mousemove', handleMouseMove as EventListener);
+    return () => window.removeEventListener('mousemove', handleMouseMove as EventListener);
+  }, []);
 
   useEffect(() => {
     const sequence = async () => {
-      await titleControls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } })
-      await contentControls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } })
-    }
-    sequence()
-  }, [titleControls, contentControls])
+      await titleControls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } });
+      await contentControls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } });
+    };
+    sequence();
+  }, [titleControls, contentControls]);
 
   return (
     <Parallax bgImage="/hero-bg.jpg" strength={500}>
@@ -201,7 +204,7 @@ const HeroSection = () => {
         </motion.div>
       </motion.section>
     </Parallax>
-  )
+  );
 }
 
-export default HeroSection
+export default HeroSection;

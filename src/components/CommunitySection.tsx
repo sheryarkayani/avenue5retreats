@@ -96,8 +96,8 @@ const CommunitySection = () => {
               <CardContent className="p-4 relative">
                 <div className="absolute inset-0 bg-gradient-to-bl from-[#800020] to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 <Badge className="mb-2 bg-[#800020]">Exclusive</Badge>
-                <h3 className="font-bold mb-2 group-hover:text-[#D4AF37] transition-colors duration-300">Wine Tasting</h3>
-                <p className="text-sm text-gray-300">Savor premium wines from around the world.</p>
+                <h3 className="font-bold mb-2 group-hover:text-[#D4AF37] transition-colors duration-300">coffee Tasting</h3>
+                <p className="text-sm text-gray-300">Savor premium coffee from around the world.</p>
                 <motion.div 
                   className="absolute bottom-2 right-2 w-8 h-8 bg-[#D4AF37] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100"
                   initial={{ scale: 0 }}
