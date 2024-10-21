@@ -1,10 +1,15 @@
-import HomePage from './pages/homepage'
+
+import Home from './pages/index'
 import "./styles/globals.css";  // Adjust path based on your project
+import './App.css';
+import './index.css';
 
 
 function App() {
   return (
-    <HomePage />
+    <div className="App">
+      <Home />
+    </div>
   )
 }
 
